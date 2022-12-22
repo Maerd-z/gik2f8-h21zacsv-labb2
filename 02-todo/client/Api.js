@@ -132,13 +132,29 @@ class Api {
 
   /***********************Labb 2 ***********************/
 
-  finishTask(id){
-    const request = new Request(this.url, {
+  // 
+  patchTask(id, data){
+    // data is object with the completed attribute.
+    const json = JSON.stringify(data)
+    console.log(this.url)
+    return fetch(`${this.url}/cool/${id}`, {
       method: 'PATCH',
-      body: JSONData,
+      body: json,
       headers: {
         'content-type': 'application/json'
       }
-    });
+    })
+  }
+
+  // Method for marking tasks completed.
+  finishTask(id){
+    const task = document.getElementById(`checkbox${id}`)
+    const taskPatch = {
+      completed: task.checked
+    }
+    console.log(this.url)
+    console.log(taskPatch)
+    // Request is sent and task list is re-drawn.
+    api.patchTask(taskPatch).then(data => renderList());
   }
 }

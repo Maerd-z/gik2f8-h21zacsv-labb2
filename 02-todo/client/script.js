@@ -28,17 +28,6 @@ todoForm.dueDate.addEventListener('input', (e) => validateField(e.target));
 todoForm.dueDate.addEventListener('blur', (e) => validateField(e.target));
 
 
-const check = document.getElementsByClassName("check");
-console.log(check)
-
-for (let i = 0; i < check.length; i++){
-  //check[i].addEventListener('change', ChangeEvent)
-  console.log("hah KYS")
-}
-
-function ChangeEvent(){
-  console.log("hah")
-}
 
 /* Formuläret har eventtypen"submit", som triggas när någon trycker på en knapp av typen "submit". Som denna: 
 <button name="submitTodoForm" class="rounded-md bg-yellow-500 hover:bg-yellow-400 px-4 py-1" type="submit"> */
@@ -249,7 +238,7 @@ function renderTask({ id, title, description, dueDate }) {
     /* Det som ska göras om description finns är att html-variabeln ska byggas på med HTML-kod som visar det som finns i description-egenskapen hos task-objektet. */
     (html += `
       <span style="display:flex; flex-wrap: wrap; ">
-      <input type="checkbox" class="check" value=${id}>
+      <input type="checkbox" onchange="toggleCheckBox(${id})" id="checkbox${id}">
       <p class="ml-8 mt-2 text-xs italic">${description}</p>
       </span>
   `);
@@ -278,6 +267,12 @@ function deleteTask(id) {
   });
 }
 
+
+function toggleCheckBox(id){
+  element = document.getElementById(`checkbox${id}`)
+  console.log(element.checked)
+  api.finishTask(id)
+}
 /***********************Labb 2 ***********************/
 /* Här skulle det vara lämpligt att skriva den funktion som angivits som eventlyssnare för när någon markerar en uppgift som färdig. Jag pratar alltså om den eventlyssnare som angavs i templatesträngen i renderTask. Det kan t.ex. heta updateTask. 
   
