@@ -136,8 +136,8 @@ class Api {
   patchTask(id, data){
     // data is object with the completed attribute.
     const json = JSON.stringify(data)
-    console.log(this.url)
-    return fetch(`${this.url}/${id}`, {
+    console.log(`${this.url}/cool/${id}`)
+    return fetch(`${this.url}/cool/${id}`, {
       method: 'PATCH',
       body: json,
       headers: {
@@ -152,9 +152,9 @@ class Api {
     const taskPatch = {
       completed: task.checked
     }
-    console.log(this.url)
+    console.log(task)
     console.log(taskPatch)
     // Request is sent and task list is re-drawn.
-    api.patchTask(taskPatch).then(data => renderList());
+    api.patchTask(id, taskPatch).then(data => renderList());
   }
 }

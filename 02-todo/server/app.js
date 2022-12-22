@@ -6,7 +6,7 @@ const app = express();
 /* Importerar den inbyggda modulen fs */
 const fs = require('fs/promises');
 
-const PORT = 5500;
+const PORT = 5000;
 /* Expressobjektet, kallat app, har metoden "use" som används för att sätta inställningar hos vår server */
 app
   /* Man kan ange format etc. på de data som servern ska kunna ta emot och skicka. Metoderna json och urlencoded är inbyggda hos express */
@@ -113,13 +113,12 @@ app.delete('/tasks/:id', async (req, res) => {
   }
 });
 
-
-// Find task with id. re-write "completed" property
-app.patch('/tasks/:id', async (req, res) => {
+app.patch('/tasks/cool/:id', async (req, res) => {
   console.log(req);
   try{
     const id = req.params.id;
-    //const data = req.body;
+    let index = 0;
+
     const listBuffer = await fs.readFile('./tasks.json');
 
     //currentTasks is a list of JS objects.
@@ -129,24 +128,28 @@ app.patch('/tasks/:id', async (req, res) => {
     const task = currentTasks.filter((t) => t.id == id);
 
     //Find the index of the correct task in the list.
-    for (let i = 0; i < currentTasks.length; i++){
-      if(currentTasks[i].id == task.id){
-        const index = i;
+    for (const task of currentTasks){
+      if(task.id == id){
         break;
       }
+      index += 1;
     }
-    // need to change the completed property
+    //Flip the completed property.
     if (currentTasks[index].completed == true){
       currentTasks[index].completed = false;
     }
-    if (currentTasks[index].completed == false){
+    else if (currentTasks[index].completed == false){
       currentTasks[index].completed = true
     }
-    //Send the changed task back. hopefully :)
-    res.send(task)
+
+    //Write changes to the JSON file.
+    await fs.writeFile('./tasks.json', JSON.stringify(currentTasks));
+
+    //Confirmation message.
+    res.send({message: `Task with id: ${id} is now ${currentTasks[index].completed}.`})
   }
   catch{
-    res.status(500).send({error: error.stack})
+    res.status(500).send({error: "Try another index q:)"})
   }
 })
 

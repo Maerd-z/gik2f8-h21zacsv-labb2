@@ -181,6 +181,9 @@ function renderList() {
 
     /* Här används todoListElement, en variabel som skapades högt upp i denna fil med koden const todoListElement = document.getElementById('todoList');
      */
+    
+    //Converts to dueDate to an acceptable format and sorts.
+    tasks.sort((a,b) => new Date(a.dueDate) - new Date(b.dueDate));
 
     /* Först sätts dess HTML-innehåll till en tom sträng. Det betyder att alla befintliga element och all befintlig text inuti todoListElement tas bort. Det kan nämligen finnas list-element däri när denna kod körs, men de tas här bort för att hela listan ska uppdateras i sin helhet. */
     todoListElement.innerHTML = '';
@@ -210,18 +213,13 @@ function renderList() {
 Endast en uppgift åt gången kommer att skickas in här, eftersom den anropas inuti en forEach-loop, där uppgifterna loopas igenom i tur och ordning.  */
 
 /* Destructuring används för att endast plocka ut vissa egenskaper hos uppgifts-objektet. Det hade kunnat stå function renderTask(task) {...} här - för det är en hel task som skickas in - men då hade man behövt skriva task.id, task.title osv. på alla ställen där man ville använda dem. Ett trick är alltså att "bryta ut" dessa egenskaper direkt i funktionsdeklarationen istället. Så en hel task skickas in när funktionen anropas uppe i todoListElement.insertAdjacentHTML("beforeend", renderTask(task)), men endast vissa egenskaper ur det task-objektet tas emot här i funktionsdeklarationen. */
-function renderTask({ id, title, description, dueDate }) {
-  /* Baserat på inskickade egenskaper hos task-objektet skapas HTML-kod med styling med hjälp av tailwind-klasser. Detta görs inuti en templatestring  (inom`` för att man ska kunna använda variabler inuti. Dessa skrivs inom ${}) */
+function renderTask({ id, title, description, dueDate, completed }) {
 
-  /*
-  Det som skrivs inom `` är vanlig HTML, men det kan vara lite svårt att se att det är så. Om man enklare vill se hur denna kod fungerar kan man klistra in det i ett HTML-dokument, för då får man färgkodning och annat som kan underlätta. Om man gör det kommer dock ${...} inte innehålla texten i variabeln utan bara skrivas ut som det är. Men det är lättare att felsöka just HTML-koden på det sättet i alla fall. 
-  */
+  let html = ""
 
-  /* Lite kort om vad HTML-koden innehåller. Det mesta är bara struktur och Tailwind-styling enligt eget tycke och smak. Värd att nämna extra är dock knappen, <button>-elementet, en bit ned. Där finns ett onclick-attribut som kopplar en eventlyssnare till klickeventet. Eventlyssnaren här heter onDelete och den får med sig egenskapen id, som vi fått med oss från task-objektet. Notera här att det går bra att sätta parenteser och skicka in id på detta viset här, men man fick inte sätta parenteser på eventlyssnare när de kopplades med addEventListener (som för formulärfälten högre upp i koden). En stor del av föreläsning 3 rörande funktioner och event förklarar varför man inte får sätta parenteser på callbackfunktioner i JavaScriptkod. 
-  
-  När eventlyssnaren kopplas till knappen här nedanför, görs det däremot i HTML-kod och inte JavaScript. Man sätter ett HTML-attribut och refererar till eventlyssnarfunktionen istället. Då fungerar det annorlunda och parenteser är tillåtna. */
-  let html = `
-    <li class="select-none mt-2 py-2 border-b border-amber-300">
+  if (completed == true){
+    html = 
+    `<li class="select-none mt-2 py-2 border-b border-amber-300 opacity-25">
       <div class="flex items-center">
         <h3 class="mb-3 flex-1 text-xl font-bold text-pink-800 uppercase">${title}</h3>
         <div>
@@ -229,6 +227,8 @@ function renderTask({ id, title, description, dueDate }) {
           <button onclick="deleteTask(${id})" class="inline-block bg-amber-500 text-xs text-amber-900 border border-white px-3 py-1 rounded-md ml-2">Ta bort</button>
         </div>
       </div>`;
+  
+  
 
   /* Här har templatesträngen avslutats tillfälligt för att jag bara vill skriva ut kommande del av koden om description faktiskt finns */
 
@@ -237,15 +237,47 @@ function renderTask({ id, title, description, dueDate }) {
 
     /* Det som ska göras om description finns är att html-variabeln ska byggas på med HTML-kod som visar det som finns i description-egenskapen hos task-objektet. */
     (html += `
-      <span style="display:flex; flex-wrap: wrap; ">
-      <input type="checkbox" onchange="toggleCheckBox(${id})" id="checkbox${id}">
-      <p class="ml-8 mt-2 text-xs italic">${description}</p>
-      </span>
-  `);
+        <span style="display:flex; flex-wrap: wrap; ">
+        <input type="checkbox" checked onchange="toggleCheckBox(${id})" id="checkbox${id}">
+        <p class="ml-8 mt-2 text-xs italic">${description}</p>
+        </span>
+    `);
 
   /* När html-strängen eventuellt har byggts på med HTML-kod för description-egenskapen läggs till sist en sträng motsvarande sluttaggen för <li>-elementet dit. */
   html += `
-    </li>`;
+      </li>`;
+  }
+
+  else if (completed == false){
+    html = 
+    `<li class="select-none mt-2 py-2 border-b border-amber-300">
+      <div class="flex items-center">
+        <h3 class="mb-3 flex-1 text-xl font-bold text-pink-800 uppercase">${title}</h3>
+        <div>
+          <span>${dueDate}</span>
+          <button onclick="deleteTask(${id})" class="inline-block bg-amber-500 text-xs text-amber-900 border border-white px-3 py-1 rounded-md ml-2">Ta bort</button>
+        </div>
+      </div>`;
+  
+  
+
+  /* Här har templatesträngen avslutats tillfälligt för att jag bara vill skriva ut kommande del av koden om description faktiskt finns */
+
+  description &&
+    /* Med hjälp av && kan jag välja att det som står på andra sidan && bara ska utföras om description faktiskt finns.  */
+
+    /* Det som ska göras om description finns är att html-variabeln ska byggas på med HTML-kod som visar det som finns i description-egenskapen hos task-objektet. */
+    (html += `
+        <span style="display:flex; flex-wrap: wrap; ">
+        <input type="checkbox" onchange="toggleCheckBox(${id})" id="checkbox${id}">
+        <p class="ml-8 mt-2 text-xs italic">${description}</p>
+        </span>
+    `);
+
+  /* När html-strängen eventuellt har byggts på med HTML-kod för description-egenskapen läggs till sist en sträng motsvarande sluttaggen för <li>-elementet dit. */
+  html += `
+      </li>`;
+  }
   /***********************Labb 2 ***********************/
   /* I ovanstående template-sträng skulle det vara lämpligt att sätta en checkbox, eller ett annat element som någon kan klicka på för att markera en uppgift som färdig. Det elementet bör, likt knappen för delete, också lyssna efter ett event (om du använder en checkbox, kolla på exempelvis w3schools vilket element som triggas hos en checkbox när dess värde förändras.). Skapa en eventlyssnare till det event du finner lämpligt. Funktionen behöver nog ta emot ett id, så den vet vilken uppgift som ska markeras som färdig. Det skulle kunna vara ett checkbox-element som har attributet on[event]="updateTask(id)". */
   /***********************Labb 2 ***********************/
@@ -268,7 +300,7 @@ function deleteTask(id) {
 }
 
 
-function toggleCheckBox(id){
+function toggleCheckBox(id) {
   element = document.getElementById(`checkbox${id}`)
   console.log(element.checked)
   api.finishTask(id)
