@@ -137,7 +137,7 @@ class Api {
     // data is object with the completed attribute.
     const json = JSON.stringify(data)
     console.log(this.url)
-    return fetch(`${this.url}/cool/${id}`, {
+    return fetch(`${this.url}/${id}`, {
       method: 'PATCH',
       body: json,
       headers: {

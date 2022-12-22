@@ -6,7 +6,7 @@ const app = express();
 /* Importerar den inbyggda modulen fs */
 const fs = require('fs/promises');
 
-const PORT = 5000;
+const PORT = 5500;
 /* Expressobjektet, kallat app, har metoden "use" som används för att sätta inställningar hos vår server */
 app
   /* Man kan ange format etc. på de data som servern ska kunna ta emot och skicka. Metoderna json och urlencoded är inbyggda hos express */
@@ -112,30 +112,43 @@ app.delete('/tasks/:id', async (req, res) => {
     res.status(500).send({ error: error.stack });
   }
 });
-/*
-app.patch('/tasks/cool/:id', async (req, res) => {
+
+
+// Find task with id. re-write "completed" property
+app.patch('/tasks/:id', async (req, res) => {
   console.log(req);
   try{
     const id = req.params.id;
+    //const data = req.body;
     const listBuffer = await fs.readFile('./tasks.json');
+
+    //currentTasks is a list of JS objects.
     const currentTasks = JSON.parse(listBuffer);
-    
-    if (currentTasks.length > 0) 
-    {
-      const cTask = await fs.readFile(
-        './sleep.json',
-        JSON.stringify(currentTasks.filter((task) => task.id == id))
-      )
-      res.send({message: `this is cTask: ${cTask}`})
+
+    //Get the correct task.
+    const task = currentTasks.filter((t) => t.id == id);
+
+    //Find the index of the correct task in the list.
+    for (let i = 0; i < currentTasks.length; i++){
+      if(currentTasks[i].id == task.id){
+        const index = i;
+        break;
+      }
     }
-    else{
-      res.status(404).send({ error: 'the day you were born was the day the circus was born'})
+    // need to change the completed property
+    if (currentTasks[index].completed == true){
+      currentTasks[index].completed = false;
     }
+    if (currentTasks[index].completed == false){
+      currentTasks[index].completed = true
+    }
+    //Send the changed task back. hopefully :)
+    res.send(task)
   }
   catch{
     res.status(500).send({error: error.stack})
   }
-})*/
+})
 
 /***********************Labb 2 ***********************/
 /* Här skulle det vara lämpligt att skriva en funktion som likt post eller delete tar kan hantera PUT- eller PATCH-anrop (du får välja vilket, läs på om vad som verkar mest vettigt för det du ska göra) för att kunna markera uppgifter som färdiga. Den nya statusen - completed true eller falase - kan skickas i förfrågans body (req.body) tillsammans med exempelvis id så att man kan söka fram en given uppgift ur listan, uppdatera uppgiftens status och till sist spara ner listan med den uppdaterade uppgiften */
