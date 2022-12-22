@@ -131,4 +131,14 @@ class Api {
   */
 
   /***********************Labb 2 ***********************/
+
+  finishTask(id){
+    const request = new Request(this.url, {
+      method: 'PATCH',
+      body: JSONData,
+      headers: {
+        'content-type': 'application/json'
+      }
+    });
+  }
 }
